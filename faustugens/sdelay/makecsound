@@ -1,0 +1,26 @@
+#!/usr/bin/fish
+set BASE fa_sdelay
+set CSOUND_PLUGIN_DIR /usr/local/lib/csound/plugins64-6.0
+
+rm *.so
+
+for f in $BASE*.dsp
+	faust2csound $f
+end
+
+cp *.so $CSOUND_PLUGIN_DIR
+
+# check installation
+echo
+echo --- csound z ---
+echo
+csound -z ^&1 | grep $BASE
+echo
+
+# list params
+for f in $BASE*.dsp.cpp
+	echo
+	echo $f
+	echo --------------------------------------
+	faustcsound-listcontrols.py $f
+end

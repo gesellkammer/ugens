@@ -1,0 +1,10 @@
+#!/usr/bin/fish
+
+for d in sdelay lagud env transpose
+	cd $d
+	echo
+	echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>> folder: " $d
+	echo 
+	./makecsound
+	cd ..
+end
