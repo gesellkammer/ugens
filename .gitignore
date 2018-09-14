@@ -1,2 +1,6 @@
 build/
 *.so
+*.wav
+*~
+*.zip
+*.mp3
