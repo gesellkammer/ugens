@@ -1,0 +1,22 @@
+#!/bin/bash
+
+OPCODES=\
+"bpf bpfcos linlin lincos cmp ftprint ftslice printarray printarray_setfmt reshapearray tab2array xyscale ftom mtof ntom mton" 
+manualpath=~/dev/forks/manual
+
+for opc in $OPCODES; do
+    example=$opc.csd
+    xml=$opc.xml
+    echo $opc
+    if [ -e examples/$example ]; then
+        echo ">>> copiando example" 
+        cp examples/$example $manualpath/examples/$example
+    fi
+    if [ -e manual/$xml ]; then
+        echo ">>> copiando manual"
+        cp manual/$xml $manualpath/opcodes/$xml
+    fi
+done
+
+cp examples/mtof-ftom.csd $manualpath/examples
+cp examples/mton-ntom.csd $manualpath/examplesOB

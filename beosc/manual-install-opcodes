@@ -1,0 +1,35 @@
+#!/bin/bash
+
+OPCODES="beosc beadsynt tabrowlin getrowlin"
+manualpath=~/dev/forks/manual
+
+for opc in $OPCODES; do
+    example=$opc.csd
+    xml=$opc.xml
+    echo $opc
+    if [ -e examples-manual/$example ]; then
+        echo ">>> copiando example" 
+        cp examples-manual/$example $manualpath/examples/$example
+    fi
+    if [ -e manual/$xml ]; then
+        echo ">>> copiando manual"
+        cp manual/$xml $manualpath/opcodes/$xml
+    fi
+done
+
+images=$(find manual -maxdepth 1 -name "*.jpg" -or -name "*.png")
+if [ -n "$images" ]; then
+    for img in $images; do
+        echo cp "$img" "$manualpath/images"
+        cp "$img" "$manualpath/images"
+    done
+fi
+
+soundfiles=$(find examples-manual -maxdepth 1 -name "*.wav")
+if [ -n "$soundfiles" ]; then
+    for snd in $soundfiles; do
+        sndbase=$(basename $snd)
+        echo cp "$snd" "$manualpath/examples"
+        cp "$snd" "$manualpath/examples"
+    done
+fi
