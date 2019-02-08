@@ -31,10 +31,10 @@ instr 2
   od
 endin
 
-schedule $INSTNUM, 0, 1
+schedule $INSTNUM, 0, 0.5
     
 </CsInstruments>
 <CsScore>
-f 0 1
+f 0 0.5
 </CsScore>
 </CsoundSynthesizer>
