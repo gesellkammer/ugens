@@ -112,6 +112,7 @@
 #define DEBUG(a) do { printf("%s\n", a); fflush(stdout); } while (0)
 
 
+static
 char* cs_strdup(CSOUND* csound, char* str) {
     size_t len;
     char* retVal;
@@ -128,6 +129,7 @@ char* cs_strdup(CSOUND* csound, char* str) {
     return retVal;
 }
 
+static
 char *cs_strdup_overalloc(CSOUND *csound, char *str, int32_t overalloc) {
     size_t len;
     char* retVal;
@@ -145,17 +147,21 @@ char *cs_strdup_overalloc(CSOUND *csound, char *str, int32_t overalloc) {
     return retVal;
 }
 
-inline void strncpy0(char *dest, const char *src, size_t n) {
+static inline
+void strncpy0(char *dest, const char *src, size_t n) {
     strncpy(dest, src, n);
     dest[n] = '\0';
 }
 
+/*
+static
 char* strensure(CSOUND *csound, char *s, int minsize, int overalloc) {
     if((int)sizeof(s) < minsize) {
         s = csound->ReAlloc(csound, s, minsize + overalloc);
     }
     return s;
 }
+*/
 
 // float=1, str=2
 const int khStrFloat = 21;
@@ -222,9 +228,10 @@ typedef struct {
     #define UNLOCK(x) do {} while(0)
 #endif
 
-int32_t hashtab_reset(CSOUND *csound, KHASH_GLOBALS *g);
-int32_t _hashtab_free(CSOUND *csound, KHASH_GLOBALS *g, int32_t idx);
+static int32_t hashtab_reset(CSOUND *csound, KHASH_GLOBALS *g);
+static int32_t _hashtab_free(CSOUND *csound, KHASH_GLOBALS *g, int32_t idx);
 
+static
 KHASH_GLOBALS* hashtab_globals(CSOUND *csound) {
     KHASH_GLOBALS *g = (KHASH_GLOBALS*)csound->QueryGlobalVariable(csound, "khashGlobals_");
     if(LIKELY(g != NULL))
@@ -244,6 +251,7 @@ KHASH_GLOBALS* hashtab_globals(CSOUND *csound) {
     return g;
 }
 
+static
 int32_t hashtab_getfreeslot(KHASH_GLOBALS *g) {
     for(int32_t i=0; i<g->maxhandles; i++) {
         if(g->handles[i].khashptr == NULL) {
@@ -264,6 +272,7 @@ int32_t hashtab_getfreeslot(KHASH_GLOBALS *g) {
     return idx;
 }
 
+static
 int32_t hashtab_reset(CSOUND *csound, KHASH_GLOBALS *g) {
     int32_t i;
     for(i = 0; i < g->maxhandles; i++) {
@@ -280,6 +289,7 @@ int32_t hashtab_reset(CSOUND *csound, KHASH_GLOBALS *g) {
     return OK;
 }
 
+static
 int32_t hashtab_make(CSOUND *csound, int khtype, int isglobal) {
     KHASH_GLOBALS *g = hashtab_globals(csound);
     int32_t idx = hashtab_getfreeslot(g);
@@ -306,6 +316,7 @@ int32_t hashtab_make(CSOUND *csound, int khtype, int isglobal) {
     return idx;
 }
 
+static
 int32_t _hashtab_free(CSOUND *csound, KHASH_GLOBALS *g, int32_t idx) {
     int khtype = g->handles[idx].khtype;
     khint_t k;
@@ -355,6 +366,7 @@ int32_t _hashtab_free(CSOUND *csound, KHASH_GLOBALS *g, int32_t idx) {
     return OK;
 }
 
+static
 int32_t hashtab_deinit_callback(CSOUND *csound, HASHTAB_NEW* p) {
     int idx = (int32_t)*p->ihandleidx;
     KHASH_GLOBALS *g = p->globals;
@@ -366,6 +378,7 @@ int32_t hashtab_deinit_callback(CSOUND *csound, HASHTAB_NEW* p) {
     return _hashtab_free(csound, g, idx);
 }
 
+static
 char* intdef2stringdef(int32_t intdef) {
     // convert an integer definition of a hashtab type A -> B
     // to its string representation
@@ -382,6 +395,7 @@ char* intdef2stringdef(int32_t intdef) {
     return NULL;
 }
 
+static
 int32_t stringdef2intdef(STRINGDAT *s) {
     // convert a string definition of a hashtab type A->B to
     // its integer representation
@@ -416,6 +430,7 @@ int32_t stringdef2intdef(STRINGDAT *s) {
     }
 }
 
+static
 int32_t hashtab_init(CSOUND *csound, HASHTAB_NEW *p) {
     p->globals = hashtab_globals(csound);
     int32_t khtype = stringdef2intdef(p->keyvaltype);
@@ -457,6 +472,7 @@ typedef struct {
 } HASHTAB_SET_if;
 
 
+static
 int32_t hashtab_set_if_init(CSOUND *csound, HASHTAB_SET_if *p) {
     p->globals = hashtab_globals(csound);
     p->lastkey = -1;
@@ -465,21 +481,7 @@ int32_t hashtab_set_if_init(CSOUND *csound, HASHTAB_SET_if *p) {
     return OK;
 }
 
-/*
-
-static spin_lock_t lock = SPINLOCK_INIT;
-csoundSpinLockInit(&lock);
-void write(size_t frames, int* signal)
-{
-  csoundSpinLock(&lock);
-  for (size_t frame = 0; i < frames; frame++) {
-    global_buffer[frame] += signal[frame];
-  }
-  csoundSpinUnlock(&lock);
-}
-
- */
-
+static
 int32_t hashtab_set_if(CSOUND *csound, HASHTAB_SET_if *p) {
     KHASH_GLOBALS *g = p->globals;
     int32_t idx = (int32_t)*p->ihandle;
@@ -511,6 +513,7 @@ int32_t hashtab_set_if(CSOUND *csound, HASHTAB_SET_if *p) {
     return OK;
 }
 
+static
 int32_t hashtab_set_if_i(CSOUND *csound, HASHTAB_SET_if *p) {
     hashtab_set_if_init(csound, p);
     return hashtab_set_if(csound, p);
@@ -532,7 +535,7 @@ typedef struct {
     char lastkey_data[KHASH_STRKEY_MAXSIZE+1];
 } HASHTAB_SET_sf;
 
-
+static
 int32_t hashtab_set_sf_init(CSOUND *csound, HASHTAB_SET_sf *p) {
     KHASH_GLOBALS *g = hashtab_globals(csound);
     p->khashglobals = g;
@@ -543,6 +546,7 @@ int32_t hashtab_set_sf_init(CSOUND *csound, HASHTAB_SET_sf *p) {
     return OK;
 }
 
+static
 int32_t hashtab_set_sf(CSOUND *csound, HASHTAB_SET_sf *p) {
     KHASH_GLOBALS *g = p->khashglobals;
     int32_t idx = (int32_t)*p->ihandle;
@@ -580,6 +584,7 @@ int32_t hashtab_set_sf(CSOUND *csound, HASHTAB_SET_sf *p) {
     return OK;
 }
 
+static
 int32_t hashtab_set_sf_i(CSOUND *csound, HASHTAB_SET_sf *p) {
     hashtab_set_sf_init(csound, p);
     return hashtab_set_sf(csound, p);
@@ -604,6 +609,7 @@ typedef struct {
 
 #define KHASH_KEY_MINSIZE 24
 
+static
 int32_t hashtab_set_ss_init(CSOUND *csound, HASHTAB_SET_ss *p) {
     p->khashglobals = hashtab_globals(csound);
     p->lastkey_size = -1;
@@ -613,6 +619,7 @@ int32_t hashtab_set_ss_init(CSOUND *csound, HASHTAB_SET_ss *p) {
     return OK;
 }
 
+static
 int32_t hashtab_set_ss(CSOUND *csound, HASHTAB_SET_ss *p) {
     KHASH_GLOBALS *g = p->khashglobals;
     int32_t idx = (int32_t)*p->ihandle;
@@ -674,7 +681,7 @@ typedef struct {
     uint64_t counter;
 } HASHTAB_SET_is;
 
-
+static
 int32_t hashtab_set_is_init(CSOUND *csound, HASHTAB_SET_is *p) {
     p->globals = hashtab_globals(csound);
     p->lastkey = -1;
@@ -683,6 +690,7 @@ int32_t hashtab_set_is_init(CSOUND *csound, HASHTAB_SET_is *p) {
     return OK;
 }
 
+static
 int32_t hashtab_set_is(CSOUND *csound, HASHTAB_SET_is *p) {
     KHASH_GLOBALS *g = p->globals;
     int32_t idx = (int32_t)*p->ihandle;
@@ -730,6 +738,7 @@ typedef struct {
     STRINGDAT *key;
 } HASHTAB_DEL_s;
 
+static
 int32_t hashtab_del_s(CSOUND *csound, HASHTAB_DEL_s *p) {
     KHASH_GLOBALS *g = hashtab_globals(csound);
     int32_t idx = (int32_t)*p->ihandle;
@@ -771,6 +780,7 @@ typedef struct {
     MYFLT *key;
 } HASHTAB_DEL_i;
 
+static
 int32_t hashtab_del_i(CSOUND *csound, HASHTAB_DEL_i *p) {
     KHASH_GLOBALS *g = hashtab_globals(csound);
     int32_t idx = (int32_t)*p->ihandle;
@@ -827,6 +837,7 @@ typedef struct {
     int lastkey;
 } HASHTAB_GET_if;
 
+static
 int32_t hashtab_get_if_init(CSOUND *csound, HASHTAB_GET_if *p) {
     p->khashglobals = hashtab_globals(csound);
     p->lastkey = -1;
@@ -835,6 +846,7 @@ int32_t hashtab_get_if_init(CSOUND *csound, HASHTAB_GET_if *p) {
     return OK;
 }
 
+static
 int32_t hashtab_get_if(CSOUND *csound, HASHTAB_GET_if *p) {
     KHASH_GLOBALS *g = p->khashglobals;
     int32_t idx = (int32_t)*p->ihandle;
@@ -857,6 +869,7 @@ int32_t hashtab_get_if(CSOUND *csound, HASHTAB_GET_if *p) {
     return OK;
 }
 
+static
 int32_t hashtab_get_if_i(CSOUND *csound, HASHTAB_GET_if *p) {
     hashtab_get_if_init(csound, p);
     return hashtab_get_if(csound, p);
@@ -878,6 +891,7 @@ typedef struct {
     char lastkey_data[KHASH_STRKEY_MAXSIZE+1];
 } HASHTAB_GET_sf;
 
+static
 int32_t hashtab_get_sf_init(CSOUND *csound, HASHTAB_GET_sf *p) {
     p->khashglobals = hashtab_globals(csound);
     p->lastkey_size = -1;
@@ -888,6 +902,7 @@ int32_t hashtab_get_sf_init(CSOUND *csound, HASHTAB_GET_sf *p) {
     return OK;
 }
 
+static
 int32_t hashtab_get_sf(CSOUND *csound, HASHTAB_GET_sf *p) {
     KHASH_GLOBALS *g = p->khashglobals;
     int32_t idx = (int32_t)*p->ihandle;
@@ -920,11 +935,14 @@ int32_t hashtab_get_sf(CSOUND *csound, HASHTAB_GET_sf *p) {
     return OK;
 }
 
+static
 int32_t hashtab_get_sf_i(CSOUND *csound, HASHTAB_GET_sf *p) {
     hashtab_get_sf_init(csound, p);
     return hashtab_get_sf(csound, p);
 }
 
+/*
+static
 int32_t hashtab_get_sf_slow(CSOUND *csound, HASHTAB_GET_sf *p) {
     KHASH_GLOBALS *g = p->khashglobals;
     int32_t idx = (int32_t)*p->ihandle;
@@ -940,6 +958,7 @@ int32_t hashtab_get_sf_slow(CSOUND *csound, HASHTAB_GET_sf *p) {
     *p->kout = k != kh_end(h) ? kh_val(h, k) : *p->defaultvalue;
     return OK;
 }
+*/
 
 // kvalue hashtab_get ihandle, Skey (can be changed)
 typedef struct {
@@ -958,6 +977,7 @@ typedef struct {
 
 } HASHTAB_GET_ss;
 
+static
 int32_t hashtab_get_ss_init(CSOUND *csound, HASHTAB_GET_ss *p) {
     p->khashglobals = hashtab_globals(csound);
     p->keyidx = 0;
@@ -967,6 +987,7 @@ int32_t hashtab_get_ss_init(CSOUND *csound, HASHTAB_GET_ss *p) {
     return OK;
 }
 
+static
 int32_t hashtab_get_ss(CSOUND *csound, HASHTAB_GET_ss *p) {    
     // if the key is not found, an empty string is returned
     KHASH_GLOBALS *g = p->khashglobals;
@@ -1022,6 +1043,7 @@ typedef struct {
     int lastkey;
 } HASHTAB_GET_is;
 
+static
 int32_t hashtab_get_is_init(CSOUND *csound, HASHTAB_GET_is *p) {
     p->khashglobals = hashtab_globals(csound);
     p->lastkey = -1;
@@ -1030,6 +1052,7 @@ int32_t hashtab_get_is_init(CSOUND *csound, HASHTAB_GET_is *p) {
     return OK;
 }
 
+static
 int32_t hashtab_get_is(CSOUND *csound, HASHTAB_GET_is *p) {
     KHASH_GLOBALS *g = p->khashglobals;
     int32_t idx = (int32_t)*p->ihandle;
@@ -1082,6 +1105,7 @@ typedef struct {
     MYFLT *iwhen;
 } HASHTAB_FREE;
 
+static
 int32_t hashtab_free_callback(CSOUND *csound, HASHTAB_FREE *p) {
     int32_t idx = (int32_t)*p->ihandle;
     KHASH_GLOBALS *g = hashtab_globals(csound);
@@ -1092,6 +1116,7 @@ int32_t hashtab_free_callback(CSOUND *csound, HASHTAB_FREE *p) {
     return _hashtab_free(csound, g, idx);
 }
 
+static
 int32_t hashtab_free(CSOUND *csound, HASHTAB_FREE *p) {
     // modeled after ftfree - works at init time 
     // only global hashtables can be freed in this way. for local hashtables, the
@@ -1131,6 +1156,7 @@ typedef struct {
 
 #define HASHTAB_PRINT_MAXLINE 1024
 
+static
 int32_t _hashtab_print(CSOUND *csound, HASHTAB_PRINT *p, KHASH_HANDLE *handle) {
     int khtype = handle->khtype;
     khint_t k;
@@ -1201,6 +1227,7 @@ int32_t _hashtab_print(CSOUND *csound, HASHTAB_PRINT *p, KHASH_HANDLE *handle) {
     return OK;
 }
 
+static
 int32_t hashtab_print_i(CSOUND *csound, HASHTAB_PRINT *p) {
     KHASH_GLOBALS *g = hashtab_globals(csound);
     int idx = (int)*p->ihandle;
@@ -1209,12 +1236,14 @@ int32_t hashtab_print_i(CSOUND *csound, HASHTAB_PRINT *p) {
     return OK;
 }
 
+static
 int32_t hashtab_print_k_init(CSOUND *csound, HASHTAB_PRINT *p) {
     p->globals = hashtab_globals(csound);
     p->lasttrig = 0;
     return OK;
 }
 
+static
 int32_t hashtab_print_k(CSOUND *csound, HASHTAB_PRINT *p) {
     KHASH_GLOBALS *g = p->globals;
     int idx = (int)*p->ihandle;
@@ -1239,6 +1268,7 @@ typedef struct {
 } HASHTAB_GETTYPE;
 
 
+static
 int32_t hashtab_gettype(CSOUND *csound, HASHTAB_GETTYPE *p) {
     KHASH_GLOBALS *g = hashtab_globals(csound);
     int idx = (int)*p->ihandle;
